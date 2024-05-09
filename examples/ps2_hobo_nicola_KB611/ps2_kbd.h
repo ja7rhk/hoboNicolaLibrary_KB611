@@ -52,6 +52,9 @@ public:
 	bool kbd_reset();
 	bool kbd_led(uint8_t led);
 	void toggle_led(uint8_t led);
+//**koseki(2024.3.21)
+	bool kbd_jis109();
+//**
 
 	void toggle_capslock_led() { toggle_led(PS2_LED_CAPSLOCK); }
 	void toggle_numlock_led() { toggle_led(PS2_LED_NUMLOCK); }

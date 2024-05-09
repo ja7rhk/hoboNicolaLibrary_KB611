@@ -90,8 +90,20 @@ bool ps2_kbd::begin(keyboard_notify* p, uint8_t led_pin) {
 	bus_state = Idle;
 	::clear_buffer();
 	attachInterrupt(CLK_INT, clk_interrupt, FALLING);
+//**koseki(2024.3.21)
+/*
 	delay(500);
 	return kbd_reset();
+*/
+	bool ack = false;
+	for(int8_t i = 0; i < 8; i++) {
+		delay(500);
+		ack = kbd_reset();
+		if (ack)
+			break;
+	}
+	return ack;
+//**
 }
 
 #if 0
@@ -183,6 +195,19 @@ bool ps2_kbd::kbd_led(uint8_t led) {
 	return f;
 }
 
+//**koseki(2024.3.21)
+//KB611の親指シフト動作を無効にする。
+bool ps2_kbd::kbd_jis109() {
+	send_command(0xf0);				// スキャンコード変更コマンド
+	bool f = send_command(0x8c);	// コマンドの引数、ACKが返ればKB611
+	if (f) {
+		send_command(0x09); // 親指シフト動作を無効
+	} else
+		kbd_reset();
+	return f;
+}
+//**
+
 void ps2_kbd::toggle_led(uint8_t led) {
 	uint8_t new_led = kbd_led_state;
 	if (new_led & led)
@@ -231,9 +256,16 @@ static const uint8_t RCTL = HID_R_CTRL;
 static const uint8_t RSFT = HID_R_SHIFT;
 static const uint8_t RALT = HID_R_ALT;
 static const uint8_t RGUI = HID_R_GUI;
+//**koseki(2024.3.21)
+static const uint8_t LOYA = HID_F23;	//左親指キー
+static const uint8_t ROYA = HID_F24;	//右親指キー
+//**
 
 // ps/2 ---> hid code conversion table.
 // hid_usage_id = table[scan_code - 1]; (single coded keys only).
+//**koseki(2024.3.21)
+// 左親指(0x10)と右親指(0x18)を追加
+/*
 static const uint8_t table[] = {
 //  0   1      2     3    4     5     6    7    8    9     a     b     c     d    e   f
   0x42, 0,    0x3e, 0x3c, 0x3a, 0x3b, 0x45, 0,    0x43, 0x41, 0x3f, 0x3d, 0x2b, 0x35, 0, 0,   // 0 F9   --   F5    F3     F1  F2  F12      --   F10  F8  F6  F4  TAB HANKAKU -- --
@@ -245,6 +277,20 @@ static const uint8_t table[] = {
   0,    0,    0,    0x8a, 0,    0x2a, 0x8b, 0,    0x59, 0x89, 0x5c, 0x5f, 0,    0,    0, 0x62,// 6 --   --   --    HENKAN --  BS  MUHENKAN --   P1   \   P4  P7  --  --      -- P0
   0x63, 0x5a, 0x5d, 0x5e, 0x60, 0x29, 0x53, 0x44, 0x57, 0x5b, 0x56, 0x55, 0x61, 0x47, 0, 0    // 7 P.   P2   P5    P6     P8  ESC NUMLOCK  F11  P+   P3  P-  P*  P9  SCRLOCK -- --
 };
+*/
+static const uint8_t table[] = {
+//0     1     2     3     4     5     6     7     8     9     a     b     c     d     e  f
+  0x42, 0,    0x3e, 0x3c, 0x3a, 0x3b, 0x45, 0x29, 0x43, 0x41, 0x3f, 0x3d, 0x2b, 0x35, 0, LOYA,  // 0 F9   --   F5    F3     F1  F2  F12     *取消 F10  F8  F6  F4  TAB HANKAKU -- *LOYA
+  LALT, LSFT, 0x88, LCTL, 0x14, 0x1e, 0,    ROYA, 0,    0x1d, 0x16, 0x04, 0x1a, 0x1f, 0, 0,   	// 1 LALT LSFT HIRA  LCTL   Q   1   --      *ROYA --   Z   S   A   W   2       -- --
+  0x06, 0x1b, 0x07, 0x08, 0x21, 0x20, 0,    0,    0x2c, 0x19, 0x09, 0x17, 0x15, 0x22, 0, 0,   	// 2 C    X    D     E      4   3   --       --   SPC  V   F   T   R   5       -- --
+  0x11, 0x05, 0x0b, 0x0a, 0x1c, 0x23, 0,    0,    0,    0x10, 0x0d, 0x18, 0x24, 0x25, 0, 0,   	// 3 N    B    H     G      Y   6   --       --   --   M   J   U   7   8       -- --
+  0x36, 0x0e, 0x0c, 0x12, 0x27, 0x26, 0,    0,    0x37, 0x38, 0x0f, 0x33, 0x13, 0x2d, 0, 0,   	// 4 ,    K    I     O      0   9   --       --   .    /   L   ;   P   -       -- --
+  0x87, 0x34, 0,    0x2f, 0x2e, 0,    0,    0x39, RSFT, 0x28, 0x30, 0,    0x32, 0,    0, 0,   	// 5 _    :    --    @      ^   --  --       CAPS RSFT ENT [   --  ]   --      -- --
+  0,    0,    0,    0x8a, 0,    0x2a, 0x8b, 0,    0x59, 0x89, 0x5c, 0x5f, 0,    0,    0, 0x62,	// 6 --   --   --    HENKAN --  BS  MUHENKAN --   P1   \   P4  P7  --  --      -- P0
+  0x63, 0x5a, 0x5d, 0x5e, 0x60, 0x29, 0x53, 0x44, 0x57, 0x5b, 0x56, 0x55, 0x61, 0x47, 0, 0    	// 7 P.   P2   P5    P6     P8  ESC NUMLOCK  F11  P+   P3  P-  P*  P9  SCRLOCK -- --
+};
+//**
+
 //
 //  table for E0 prefixed  keys.
 // E0 12を排除すること。
