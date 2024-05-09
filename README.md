@@ -24,11 +24,11 @@
 	********************************************************
 
 	\作業ディレクトリ---+---\ps2_hobo_nicola_KB611---+---ps2_hobo_nicola_KB611.ino
-					   |							|
-					   |							+---ps2_kbd.cpp
-					   |							|
-					   |							+---ps2_kbd.h
-					   |
-	                   +---\libralies---+---\Adafruit_TinyUSB_Library
+                       |							|
+                       |							+---ps2_kbd.cpp
+                       |							|
+                       |							+---ps2_kbd.h
+                       |
+                       +---\libralies---+---\Adafruit_TinyUSB_Library
 	                                    |
 	                                    +---\hoboNicolaLibrary_KB611
