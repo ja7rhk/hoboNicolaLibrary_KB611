@@ -11,7 +11,7 @@
 	ps2_hobo_nicola_KB611  : SparkFun Pro Micro相当品(+5V, 16MHz版)
 
 	設定モードに入るには 右CTRL + MENU(App) + 100ms -> 'S'キー
-	● FMV-KB611キーボードの設定モード; *3 + *N + *K
+	● FMV-KB611キーボードの設定モード; *3 + *6 + *K
 
 	---------------------------------
 	|      F23      |      F24      |	親指シフトキーは内部で使うだけ。
@@ -32,3 +32,7 @@
 	                   +---\libralies---+---\Adafruit_TinyUSB_Library
 	                                    |
 	                                    +---\hoboNicolaLibrary_KB611
+
+## 情報元
+* https://github.com/okiraku-camera/hoboNicolaLibrary オリジナルのhoboNicola library。 
+* https://github.com/okiraku-camera/observe_ime hoboNicolaで使用しているobserve_imeの情報です。
