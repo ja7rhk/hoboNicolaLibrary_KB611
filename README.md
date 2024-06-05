@@ -48,6 +48,7 @@
 ![](assets/images/ms_ime2.png)
 
 ## 情報元
+* http://usa-tarou.la.coocan.jp/oyayubi/adapter_KB611.html ホームページの解説記事。 
 * https://github.com/okiraku-camera/hoboNicolaLibrary オリジナルのhoboNicola library。 
 * https://github.com/okiraku-camera/observe_ime hoboNicolaで使用しているobserve_imeの情報です。
 
