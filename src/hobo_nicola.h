@@ -27,7 +27,7 @@
 #if !defined(__HOBO_NICOLA_H__)
 #define __HOBO_NICOLA_H__
 
-#define HOBO_NICOLA_LIBRARY_VERSION "171"
+#define HOBO_NICOLA_LIBRARY_VERSION "177"
 
 #if !defined(ARDUINO_ARCH_AVR)
 #define PROGMEM
@@ -58,8 +58,6 @@ typedef enum {  // ステートマシンに与えるイベント
 	Key_repeat
 } nicola_event_t;
 
-extern _Settings& Settings();
-
 // following bytes have hid-id
 #define HID_DIRECT_PREFIX	0x01
 
@@ -68,47 +66,45 @@ static const uint8_t NID_LEFT_OYAYUBI	= 0x80;
 static const uint8_t NID_RIGHT_OYAYUBI = 0x81;
 static const uint8_t NID_SHIFT_KEY = 0x82;
 static const uint8_t NID_LONG_PRESSED = 0x83;
-static const uint8_t NID_SETUP_KEY = 0xf0;
+// static const uint8_t NID_SETUP_KEY = 0xf0;
+
+extern uint32_t global_setting;
+extern _Settings* pSettings;
 
 class HoboNicola  {
 	key_report_t report;
-	uint32_t settings;	// current copy of eeprom.
 
 	uint8_t nicola_mode;	// 同時打鍵しますよ。
-	
-	bool disable_nicola;
 	bool dedicated_oyakeys;
 	// 左右の親指キーが専用または決め打ちの場合に実装側で値をセットすること。
 	uint8_t left_oyayubi_code;
 	uint8_t right_oyayubi_code;
 	
 public:
-	HoboNicola();
+	HoboNicola() ;
 	const uint8_t isNicola() ;
 	void key_event(uint8_t code, bool pressed);
 	void releaseAll(bool all = true);
 	void idle();
 	void error_blink(int period = 100);
-	void set_disable_nicola(bool f = true) { disable_nicola = f; }
-
+	void nicola_off() { nicola_mode = 0; }
+	
 // 親指キーのコードを変換、無変換、空白以外で指定したいようなとき
 	void set_oyayubi_keys(uint8_t left, uint8_t right) { left_oyayubi_code = left; right_oyayubi_code = right; }
 	void has_dedicated_oyakeys(bool f = true) { dedicated_oyakeys = f; }
 
+//koseki(2024.12.12)
 	enum {
-		Initial_State = 0,		// 初期状態
-		Oyayubi_State,			// 親指キー押下状態
-		Character_State,		// 文字キー押下状態
-		Char_Oya_State,			// 文字キー押下中の親指キー押下状態
-		Repeat_State,			// リピート中状態
-		Release_Wait_State		// 文字確定後リリース待ち（長押し用）
+		S1_Initial_State = 0,		// S1) 初期状態
+		S2_Character_State,			// s2) 文字キー押下状態
+		S3_Oyayubi_State,			// S3) 親指キー押下状態
+		S4_Char_Oya_State,			// S4) 文字キー押下中の親指キー押下状態
+		S5_Oya_Char_State			// S5) 親指キー押下中の文字キー押下状態
+		//Repeat_State,				// リピート中状態
+		//Release_Wait_State		// 文字確定後リリース待ち（長押し用）
 	} state;
+//**	
 	
-	bool is_initial_state() const { return (bool) ( state == Initial_State); }
-
-	void enter_setup_mode(bool f = true) { setup_mode = f; }
-	bool is_setup_mode() const { return setup_mode; }
-
 	uint8_t isScrLock() const;
 	uint8_t isNumLock() const;
 
@@ -136,8 +132,8 @@ public:
 	void apply_kbd_led();
 	void restore_kbd_led();
 
-
 protected:
+	uint8_t use_pio_usb;	// rp_hobo_nicolaですよ
 	uint8_t modifiers;
 
 	void report_press(uint8_t key, uint8_t mod);
@@ -162,30 +158,46 @@ private:
 
 	uint16_t get_nid(uint8_t& k);
 	void output() ;
+	//koseki(2024.12.12)
+	void output_oya_long_press();	// 親指シフトキー長押し
+	//**
 	const uint8_t* get_output_data(uint16_t moji, uint16_t oyayubi);  // return pgm address.
 
 	unsigned long event_time;
 	unsigned long moji_time;
 	unsigned long oyayubi_time;
-	unsigned long repeat_time;
+	//koseki(2024.12.12)
+	//unsigned long repeat_time;
+	//**
 	
 	uint16_t oyayubi;
 	uint16_t moji;
 	uint16_t repeat_moji;
 	uint16_t repeat_oyayubi;
 
-	const unsigned long e_charTime = 200;
-	const unsigned long e_oyaTime = 200;
+//**koseki(2024.12.12)
+	//const unsigned long e_charTime = 200;
+	//const unsigned long e_oyaTime = 200;
+	const unsigned long e_charTime = 150;
+	const unsigned long e_oyaTime = 250;		// 親指キー長押し
+//**
 	const unsigned long e_nicolaTime = 80;
 	const unsigned long repeat_delay = 250;
 	const unsigned long repeat_interval = 80;
 	const unsigned long e_longpressTime = 60;	// 長押し
 
-	void immediate_output(uint16_t moji);
+	//void immediate_output(uint16_t moji);
 
 	bool setup_mode;
 	void setup_options(uint8_t nid);
 	void show_setting();
 	void show_hex();
+
+	enum {
+		Memory_Setup_None = 0,
+		Memory_Setup_Read = 1,
+		Memory_Setup_Write = 2
+	} memory_setup_option;
+	void setup_memory_select(uint8_t hid);	// 設定セットのスロットの選択。
 };
 #endif

@@ -90,11 +90,14 @@ bool ps2_kbd::begin(keyboard_notify* p, uint8_t led_pin) {
 	bus_state = Idle;
 	::clear_buffer();
 	attachInterrupt(CLK_INT, clk_interrupt, FALLING);
-//**koseki(2024.3.21)
-/*
-	delay(500);
-	return kbd_reset();
-*/
+//**koseki(2024.12.12)
+	//delay(500);
+	//return kbd_reset();
+	return reset_KB611();
+//**
+}
+
+bool ps2_kbd::reset_KB611() {
 	bool ack = false;
 	for(int8_t i = 0; i < 8; i++) {
 		delay(500);
@@ -103,7 +106,6 @@ bool ps2_kbd::begin(keyboard_notify* p, uint8_t led_pin) {
 			break;
 	}
 	return ack;
-//**
 }
 
 #if 0
@@ -195,7 +197,7 @@ bool ps2_kbd::kbd_led(uint8_t led) {
 	return f;
 }
 
-//**koseki(2024.3.21)
+//**koseki(2024.12.12)
 //KB611の親指シフト動作を無効にする。
 bool ps2_kbd::kbd_jis109() {
 	send_command(0xf0);				// スキャンコード変更コマンド
@@ -256,14 +258,16 @@ static const uint8_t RCTL = HID_R_CTRL;
 static const uint8_t RSFT = HID_R_SHIFT;
 static const uint8_t RALT = HID_R_ALT;
 static const uint8_t RGUI = HID_R_GUI;
-//**koseki(2024.3.21)
-static const uint8_t LOYA = HID_F23;	//左親指キー
-static const uint8_t ROYA = HID_F24;	//右親指キー
+//**koseki(2024.12.12)
+//static const uint8_t LOYA = HID_F23;	//左親指キー
+//static const uint8_t ROYA = HID_F24;	//右親指キー
+static const uint8_t LOYA = HID_MUHENKAN;	//左親指キー
+static const uint8_t ROYA = HID_SPACE;	//右親指キー
 //**
 
 // ps/2 ---> hid code conversion table.
 // hid_usage_id = table[scan_code - 1]; (single coded keys only).
-//**koseki(2024.3.21)
+//**koseki(2024.12.12)
 // 左親指(0x10)と右親指(0x18)を追加
 /*
 static const uint8_t table[] = {

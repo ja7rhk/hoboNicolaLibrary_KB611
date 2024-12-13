@@ -24,7 +24,7 @@
 #if defined(__AVR_ATmega32U4__)
 
 #include <avr/io.h>
-#include "arduino.h"
+#include "Arduino.h"
 #include "xd_commons.h"
 #include "hobo_nicola.h"
 
@@ -67,7 +67,7 @@ void xd_rgb_sync(bool test) {
 	if (test && last_rgb_val == rgb_val)
 		return;
 	xd_update_rgb(rgb_val);
-	Settings().save_xd_rgb_value(rgb_val);
+	pSettings->save_xd_rgb_value(rgb_val);
 	last_rgb_val = rgb_val;
 }
 

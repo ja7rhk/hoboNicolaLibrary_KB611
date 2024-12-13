@@ -183,7 +183,7 @@ static const uint8_t s_darrow[] PROGMEM = {HID_DIRECT_PREFIX, HID_D_ARROW, 0};  
 static const uint8_t s_delete[] PROGMEM = {HID_DIRECT_PREFIX, HID_DELETE, 0};     // N Delete
 static const uint8_t s_enter[] PROGMEM = {HID_DIRECT_PREFIX, HID_ENTER, 0};      // M Enter
 
-//**koseki(2023/11/03)
+//**koseki(2024.12.12)
 static const uint8_t s_a_A[] PROGMEM = "A"; // A
 static const uint8_t s_a_B[] PROGMEM = "B"; // B
 static const uint8_t s_a_C[] PROGMEM = "C"; // C

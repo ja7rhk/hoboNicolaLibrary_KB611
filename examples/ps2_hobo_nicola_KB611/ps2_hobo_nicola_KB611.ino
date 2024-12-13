@@ -25,13 +25,19 @@
 
 	設定モードに入るには 右CTRL + MENU(App) + 100ms -> 'S'キー
 
-	● FMV-KB611キーボードの設定モード; *3 + *S
-     ^^^^^^^^^^^^^^^^^
+	● FMV-KB611キーボードの設定モード; *2 + *S
+       ^^^^^^^^^^^^^^^^^
 	---------------------------------
-	|      F23      |      F24      |	親指シフトキーは内部で使うだけでPCに送信されない。
+	|     無変換     |      空白      |	
 	---------------------------------
-          | 無変換 |  変換  |
+            | 無変換 |  変換  |
 	        ------------------
+
+	・親指シフトキーを長押しすると以下のコードを送出する。
+	---------------------------------
+	|     タブ      |      変換      |	
+	---------------------------------
+
 	-------------------------------------------
 	********************************************************
 	*** CPU Arduino Leonardo (Arduino AVR Boards)        ***
@@ -43,7 +49,7 @@
 					   |							|
 					   |							+---ps2_kbd.h
 					   |
-	                   +---\libralies---+---\Adafruit_TinyUSB_Library
+	                   +---\libralies---+---\Adafruit_TinyUSB_Arduino-3.6.1
 	                                    |
 	                                    +---\hoboNicolaLibrary_KB611
 */
@@ -58,6 +64,9 @@ ps2_kbd* ps2;
 // Function keys with Fn-key pressed.
 static const uint16_t fn_keys[] PROGMEM = {
 	HID_S | WITH_R_CTRL,	FN_SETUP_MODE,
+	HID_R | WITH_R_CTRL,	FN_MEMORY_READ_MODE,	// read stored settings
+	HID_W | WITH_R_CTRL,	FN_MEMORY_WRITE_MODE,	// store current settings
+
 	HID_M,								FN_MEDIA_MUTE,
 	HID_COMMA,						FN_MEDIA_VOL_DOWN,
 	HID_PERIOD,						FN_MEDIA_VOL_UP,
@@ -85,7 +94,10 @@ class ps2_event : public keyboard_notify {
 		void raw_key_event(uint8_t key, bool released = false) {
 			if (is_usb_suspended()) {
 				usb_wakeup();
-				ps2->kbd_reset();
+			//**koseki(2024.12.12)
+				//ps2->kbd_reset();
+				ps2->reset_KB611();
+			//**
 				return;
 			}
 		};
@@ -99,13 +111,13 @@ void setup() {
 	ps2 = ps2_kbd::getInstance();
 	if (!ps2->begin(new ps2_event, LED_BUILTIN_RX))
 		hobo_nicola.error_blink(400);
-//**koseki(2024.3.21)
+//**koseki(2024.12.12)
 	ps2->kbd_jis109();    //KB611の親指シフト動作を無効にする
-  delay(500);
-	hobo_nicola.has_dedicated_oyakeys(true);        // 専用の親指キーがある(KB611)
-	hobo_nicola.set_oyayubi_keys(HID_F23, HID_F24); // キーコードを変換済、左親指⇒F23、右親指⇒F24
+	delay(500);
+	hobo_nicola.has_dedicated_oyakeys(false);
+	//hobo_nicola.has_dedicated_oyakeys(true);        // 専用の親指キーがある(KB611)
+	//hobo_nicola.set_oyayubi_keys(HID_F23, HID_F24); // キーコードを変換済、左親指⇒F23、右親指⇒F24
 //**
-
 }
 
 void loop() {

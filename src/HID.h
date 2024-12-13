@@ -110,6 +110,8 @@ public:
   int SendReport(uint8_t id, const void* data, int len);
   void AppendDescriptor(HIDSubDescriptor* node);
 
+	void setPollingInterval(uint8_t msec) { _poll_interval = msec; }
+
 protected:
   // Implementation of the PluggableUSBModule
   int getInterface(uint8_t* interfaceCount);
@@ -125,12 +127,13 @@ private:
 
   uint8_t protocol;
   uint8_t idle;
+	uint8_t _poll_interval;
   
   request_callback_t request_notify;
 public:
   void set_request_callback(request_callback_t fn) {
   	request_notify = fn;
-//	request_notify(HID_SET_IDLE, idle);	// 通知が来る前に知らせておきたい。
+//	request_notify(HID_SET_IDLE, idle);	
   };
 };
 

@@ -29,8 +29,8 @@
 //	1 2 3 4 5 6 7 8 9 0 - ^ \... (行末が\ではいけません） 
 //  q w e r t y u i o p @ [
 //  a s d f g h j k l ; : ]
-//  z x c v b n m , . / _
-//**koseki(2023.11.03)
+//  z x c v b n m , . / (under_scoreは含まない)
+//**koseki(2024.12.12)
 /*
 static const uint8_t hid_to_nid_jp[] = {
 	HID_1, HID_2, HID_3, HID_4, HID_5, HID_6, HID_7, HID_8,     HID_9,      HID_0,       HID_MINUS,   HID_EQUALS,  HID_J_BSLASH,
@@ -67,7 +67,7 @@ static const uint8_t hid_to_nid_us[] = {
 #include "output_string.h"
 #define s_nul	empty_str
 
-//**koseki(2023.11.03)
+//**koseki(2024.12,12)
 // 1.7.0 １行目の記号の並びを変更。
 /*
 static const uint8_t* const output_single[] PROGMEM = {	// 単独打鍵
@@ -99,7 +99,7 @@ static const uint8_t* const output_shift[] PROGMEM = {		// Shiftキー押下中
 //1        2        3         4         5        6         7         8         9         10       11         12        13
 	s_excl,  s_dquot, s_hash,   s_doll,   s_perct, s_amp,    s_quot,   s_l_pren, s_r_pren, s_nul,   s_equ,     s_tild,   s_pipe,
 	s_nul,   s_nul,   s_nul,    s_nul,    s_nul,   s_nul,    s_nul,    s_nul,    s_nul,    s_nul,   s_l_cbrac, s_r_cbrac,
-	s_nul,   s_nul,   s_larrow, s_rarrow, s_nul,   s_pa,     s_darrow, s_uarrow, s_plus,   s_nul,  s_nul,     s_nul,
+	s_nul,   s_nul,   s_larrow, s_rarrow, s_nul,   s_pa,     s_darrow, s_uarrow, s_nul,    s_plus,  s_nul,     s_nul,
 	s_nul,   s_pi,    s_nul,    s_pu,     s_pe,    s_delete, s_enter,  s_nul,    s_po,     s_quest
 };
 
@@ -201,7 +201,7 @@ static const uint8_t* const output_shift_us[] PROGMEM = {		// US Layout with Shi
 //1        2        3         4         5        6         7         8         9         10        11         12        13
 	s_excl,  s_at,    s_hash,   s_doll,   s_perct, s_carret, s_amp,    s_aste,   s_l_pren, s_r_pren, s_uline,   s_plus,   s_pipe,
 	s_nul,   s_nul,   s_nul,    s_nul,    s_nul,   s_nul,    s_nul,    s_nul,    s_nul,    s_nul,    s_l_cbrac, s_r_cbrac,
-	s_nul,   s_nul,   s_larrow, s_rarrow, s_nul,   s_pa,     s_darrow, s_uarrow, s_colon,  s_nul,    s_nul,     s_nul,
+	s_nul,   s_nul,   s_larrow, s_rarrow, s_nul,   s_pa,     s_darrow, s_uarrow, s_nul,    s_colon,  s_nul,     s_nul,
 	s_nul,   s_pi,    s_nul,    s_pu,     s_pe,    s_delete, s_enter,  s_nul,    s_po,     s_quest
 };
 
@@ -261,7 +261,7 @@ void HoboNicola::set_nid_table(bool us) {
 uint16_t HoboNicola::get_nid(uint8_t& k) {
 	uint16_t m = 0;
 	switch(k) {
-//**koseki(2023.11.03)
+//**koseki(2024.12.12)
 //	KB611用
 /*
 	case HID_J_COLON:         // C11 : は後退キーに
@@ -274,12 +274,12 @@ uint16_t HoboNicola::get_nid(uint8_t& k) {
 //**
 	case HID_SPACE:
 		if (!dedicated_oyakeys) {
-			if (Settings().is_single_oyayubi_mode())	// シングル親指のとき、空白キーは右親指キーとみなす。
-				m = MKWORD(k, NID_RIGHT_OYAYUBI);
-			if (Settings().is_spc_to_left())
-				m = MKWORD(k, NID_LEFT_OYAYUBI);
-			else if (Settings().is_spc_to_right())
-				m = MKWORD(k, NID_RIGHT_OYAYUBI);
+			if (_SINGLE_OYAYUBI_MODE(global_setting))	// シングル親指のとき、空白キーは右親指キーとみなす。
+				m = MKWORD(HID_SPACE, NID_RIGHT_OYAYUBI);
+			if (_SPC_TO_LEFT(global_setting))
+				m = MKWORD(HID_SPACE, NID_LEFT_OYAYUBI);
+			else if (_SPC_TO_RIGHT(global_setting))
+				m = MKWORD(HID_SPACE, NID_RIGHT_OYAYUBI);
 		}
 		break;
 	case HID_F14:
@@ -287,16 +287,16 @@ uint16_t HoboNicola::get_nid(uint8_t& k) {
 		if (!dedicated_oyakeys)
 			m = MKWORD(k, NID_LEFT_OYAYUBI);
 		break;
+	case HID_ENTER:
+		if (_MUHENKAN_F14_TO_LEFT(global_setting))	// 左親指キーはEnterとする。
+			m = MKWORD(HID_ENTER, NID_LEFT_OYAYUBI);
+		break;
 	case HID_F15:
 	case HID_HENKAN:
 		if (!dedicated_oyakeys)
 			m = MKWORD(k, NID_RIGHT_OYAYUBI);
 		break;
-	case HID_PAUSE:
-	case HID_DELETE:
-		if (!is_initial_state())
-			m = MKWORD(k, NID_SETUP_KEY);	// Oyayubi_Stateのみだろう。
-		break;			
+
 	default:
 		if (dedicated_oyakeys) {	// 専用の親指キーがある
 			if (k == left_oyayubi_code)
@@ -327,7 +327,7 @@ const uint8_t*  HoboNicola::get_output_data(uint16_t moji, uint16_t oyayubi) {
 	else if (LOWBYTE(oyayubi) == NID_LEFT_OYAYUBI)
 		address = (uint8_t*)PGM_READ_ADDR(left_arr[n]);
 	else if (LOWBYTE(oyayubi) == NID_RIGHT_OYAYUBI)
-		if (Settings().is_single_oyayubi_mode())
+		if (_SINGLE_OYAYUBI_MODE(global_setting))
 			address = (uint8_t*)PGM_READ_ADDR(single_simul_arr[n]);
 		else
 			address = (uint8_t*)PGM_READ_ADDR(right_arr[n]);
