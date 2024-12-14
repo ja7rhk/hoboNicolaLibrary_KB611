@@ -1,6 +1,6 @@
 # hoboNicola library for FMV-KB611
 
-![](assets/images/PS2_adapter.jpg)
+![](assets/images/06.jpg)
 
 本ライブラリはオリジナルのhoboNicola libraryを特定のキーボード向けアダプター用に一部改変したものです。Arduinoのスケッチ部分は \hoboNicolaLibrary_KB611\examples にあります。
 
@@ -10,32 +10,38 @@
 	● 対象アダプター
 	ps2_hobo_nicola_KB611  : SparkFun Pro Micro相当品(+5V, 16MHz版)
 
-	設定モードに入るには 右CTRL + MENU(App) + 100ms -> 'S'キー
-	● FMV-KB611キーボードの設定モード; *3 + *6
+	● 設定モードに入るには 右CTRL + MENU(App) + 100ms -> 'S'キー
 
+	● FMV-KB611キーボードの設定モード; *2 + *S
+       ^^^^^^^^^^^^^^^^^
 	---------------------------------
-	|      F23      |      F24      |	親指シフトキーは内部で使うだけ。
+	|     無変換     |      空白      |	
 	---------------------------------
             | 無変換 |  変換  |
 	        ------------------
 
+	・親指シフトキーを長押しすると以下のコードを送出する。
+	---------------------------------
+	|     タブ      |      変換      |	
+	---------------------------------
+
+	-------------------------------------------
 	********************************************************
 	*** CPU Arduino Leonardo (Arduino AVR Boards)        ***
 	********************************************************
 
 	\作業ディレクトリ---+---\ps2_hobo_nicola_KB611---+---ps2_hobo_nicola_KB611.ino
-	                   |                            |
-	                   |                            +---ps2_kbd.cpp
-	                   |                            |
-	                   |                            +---ps2_kbd.h
-	                   |
-	                   +---\libralies---+---\Adafruit_TinyUSB_Library
+					   |							|
+					   |							+---ps2_kbd.cpp
+					   |							|
+					   |							+---ps2_kbd.h
+					   |
+	                   +---\libralies---+---\Adafruit_TinyUSB_Arduino-3.6.1
 	                                    |
 	                                    +---\hoboNicolaLibrary_KB611
-
 ## observe_imeとMS-IMEの設定
 
-アダプターを使用する場合、observe_imeを利用すると所謂モードずれがないので便利です。FMV-KB611は10キーがあるのでScrLockでモード切替えをします。
+アダプターを使用する場合、observe_imeを利用すると所謂モードずれがないので便利です。ScrLock または NumLock でモード切替えをします。
 
 ![](assets/images/observe_ime.png)
 
@@ -43,7 +49,7 @@
 
 ![](assets/images/ms_ime1.png)
 
-カナ変換はF7キーで出来ますが、カタカナ/ひらがなキーにカタカナ変換を割り当てることも出来ます。
+カナ変換はF7キーで出来ますが、MS-IMEの設定で Shift + 無変換キーにカタカナ変換を割り当てることも出来ます。
 
 ![](assets/images/ms_ime2.png)
 
