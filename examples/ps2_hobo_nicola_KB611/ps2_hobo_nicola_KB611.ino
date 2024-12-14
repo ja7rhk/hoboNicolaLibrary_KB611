@@ -121,9 +121,19 @@ void setup() {
 }
 
 void loop() {
+	uint16_t i = 0;
+
 	if (is_usb_suspended() ) {
 		ps2->task(0);
 		all_led_off();
+		//**koseki(2024.12.12)
+		//KB611がハングしないように10分毎にリセットしてみる。
+		i++;
+		if (i == 1200) {
+			i = 0;
+			ps2->reset_KB611();
+		}
+		//**
 		enter_sleep(500);
 	} else {
 		ps2->task(hobo_nicola.get_hid_led_state());

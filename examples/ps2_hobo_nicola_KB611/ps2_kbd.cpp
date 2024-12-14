@@ -97,6 +97,8 @@ bool ps2_kbd::begin(keyboard_notify* p, uint8_t led_pin) {
 //**
 }
 
+//**koseki(2024.12.12)
+//ACKが返るまでリセットを8回繰り返し、KB611をJIS109モードにする。
 bool ps2_kbd::reset_KB611() {
 	bool ack = false;
 	for(int8_t i = 0; i < 8; i++) {
@@ -105,8 +107,11 @@ bool ps2_kbd::reset_KB611() {
 		if (ack)
 			break;
 	}
+	kbd_jis109();
+	delay(500);
 	return ack;
 }
+//**
 
 #if 0
 void ps2_kbd::show_error(int ms) {
