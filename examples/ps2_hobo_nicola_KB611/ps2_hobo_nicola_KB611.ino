@@ -121,7 +121,7 @@ void setup() {
 }
 
 void loop() {
-	uint16_t i = 0;
+	static uint16_t i = 0;
 
 	if (is_usb_suspended() ) {
 		ps2->task(0);
