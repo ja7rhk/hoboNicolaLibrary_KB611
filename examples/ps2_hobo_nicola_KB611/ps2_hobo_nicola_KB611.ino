@@ -49,7 +49,7 @@
 					   |							|
 					   |							+---ps2_kbd.h
 					   |
-	                   +---\libralies---+---\Adafruit_TinyUSB_Arduino-3.6.1
+	                   +---\libraries---+---\Adafruit_TinyUSB_Arduino-3.6.1
 	                                    |
 	                                    +---\hoboNicolaLibrary_KB611
 */
